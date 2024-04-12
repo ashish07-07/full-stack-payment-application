@@ -3,13 +3,13 @@ import db from "@repo/db/client";
 
 const app = express();
 
-app.post("/", function (req, res) {
+app.post("/", async function (req, res) {
   const paymentInformation = {
     token: req.body.token,
     userId: req.body.user_identifier,
     amount: req.body.amount,
   };
-  db.balance.update({
+  await db.balance.update({
     where: {
       userId: paymentInformation.userId,
     },
@@ -19,9 +19,17 @@ app.post("/", function (req, res) {
       },
     },
   });
-});
-db.onRampTransaction.update({
-  where: {
-    token,
-  },
+
+  await db.onRampTransaction.update({
+    where: {
+      token: paymentInformation.token,
+    },
+    data: {
+      status: "Success",
+    },
+  });
+
+  res.status(201).json({
+    message: "Captured",
+  });
 });
